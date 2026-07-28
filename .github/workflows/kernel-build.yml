@@ -1,0 +1,57 @@
+name: BunnyX Kernel Build
+
+on:
+  push:
+    branches:
+      - wip
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    env:
+      TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+      CHAT_ID: ${{ secrets.CHAT_ID }}
+
+    steps:
+
+    # =========================
+    # Checkout
+    # =========================
+    - name: Checkout source
+      uses: actions/checkout@v4
+      with:
+        ref: copilot/add-performance-feature-backport
+
+    # =========================
+    # Install dependencies
+    # =========================
+    - name: Install dependencies
+      run: |
+        sudo apt update
+        sudo apt install -y \
+          bc bison build-essential curl flex git \
+          libssl-dev lzop python3 zip unzip \
+          gcc g++ clang lld
+
+    # =========================
+    # Give permission
+    # =========================
+    - name: Grant execute permission
+      run: chmod +x build.sh
+
+    # =========================
+    # Build Kernel
+    # =========================
+    - name: Build kernel
+      run: ./build.sh
+
+    # =========================
+    # Upload artifact (backup)
+    # =========================
+    - name: Upload zip
+      uses: actions/upload-artifact@v4
+      with:
+        name: BunnyX-Kernel
+        path: AnyKernel3/*.zip
